@@ -123,7 +123,7 @@ namespace cli_life
     class Program
     {
         static Board board;
-        static private void Reset()
+        static private int Reset()
         {
             string[] setting = new string[3];
             string path = "settings.txt";
@@ -145,6 +145,8 @@ namespace cli_life
                 height: Int32.Parse(setting[1]),
                 cellSize: 1,
                 liveDensity: 0.5);
+            int gens = Int32.Parse(setting[2]);
+            return gens;
         }
         static void Render()
         {
@@ -183,17 +185,62 @@ namespace cli_life
                 Console.Write('\n');
             }
         }
+        static int Alive()
+        {
+            int cells_alive = 0;
+            for (int row = 0; row < board.Rows; row++)
+            {
+
+                for (int col = 0; col < board.Columns; col++)
+                {
+                    var cell = board.Cells[col, row];
+                    if (cell.IsAlive)
+                    {
+                       cells_alive++;
+                    }
+                }
+            }
+            return cells_alive;
+        }
+        static int Badya()
+        {
+            int figures = 0;
+            for (int row = 0; row < board.Rows - 2; row++)
+            {
+
+                for (int col = 1; col < board.Columns - 1; col++)
+                {
+                    var cell = board.Cells[col, row];
+                    if (cell.IsAlive)
+                    {
+                        if(board.Cells[col - 1,row + 1].IsAlive && board.Cells[col + 1, row + 1].IsAlive && board.Cells[col, row + 2].IsAlive && board.Cells[col, row + 1].IsAlive == false)
+                        {
+                            figures++;
+                        }
+                    }
+                }
+            }
+            return figures;
+        }
         static void Main(string[] args)
         {
          
-            Reset();
-            while(true)
+            int gens = Reset();
+            int last_Alive = Alive();
+            int count = 0;
+            for(int i = 0; i < gens; i++)
             {
                 Console.Clear();
                 Render();
                 board.Advance();
                 Thread.Sleep(1000);
+                if (Alive() != last_Alive)
+                    count++;
+                last_Alive = Alive();
             }
+            Console.WriteLine($"Alive cells: {Alive()}");
+            Console.WriteLine($"How many badya's: {Badya()}");
+            Console.WriteLine($"How many gens to statatic: {count}");
         }
     }
 }
